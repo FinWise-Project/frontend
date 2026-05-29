@@ -117,6 +117,17 @@ body{
 .btn-primary{display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--purple);color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s}
 .btn-primary:hover{background:var(--purple3)}
 .btn-primary svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2}
+@media (max-width: 768px) {
+  .topbar {
+    padding-left: 52px; /* beri ruang untuk hamburger button */
+  }
+}
+
+@media (max-width: 768px) {
+  .topbar-title {
+    margin-left: 14px;
+  }
+}
 
 /* CONTENT AREA */
 .content{flex:1;overflow-y:auto;padding:18px 22px}
@@ -341,3 +352,108 @@ body{
 .filter-chip{padding:5px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;font-size:11px;color:var(--text2);cursor:pointer;transition:all 0.15s; flex-shrink:0}
 .filter-chip.active{background:rgba(124,58,237,0.2);border-color:rgba(124,58,237,0.4);color:var(--purple2)}
 .filter-chip:hover:not(.active){background:var(--bg3);color:var(--text)}
+
+/* Hamburger button - sembunyikan di desktop */
+.sidebar-toggle {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 1000;
+  background: var(--surface1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  color: var(--text1);
+  align-items: center;
+  justify-content: center;
+}
+
+/* Tombol X - sembunyikan di desktop */
+.sidebar-close {
+  display: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text2);
+  padding: 4px;
+  border-radius: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-close:hover {
+  background: var(--surface2);
+  color: var(--text1);
+}
+
+/* Overlay */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+}
+
+/* ===== SEMUA MOBILE DALAM SATU BLOK ===== */
+@media (max-width: 768px) {
+  .topbar {
+    padding-left: 52px;
+  }
+
+  /* Tampilkan hamburger */
+  .sidebar-toggle {
+    display: flex;
+  }
+
+  /* Tampilkan tombol X */
+  .sidebar-close {
+    display: flex;
+  }
+
+  /* Logo dan X sejajar */
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .sidebar-logo .logo-mark {
+    flex: 1;
+  }
+
+  /* Sembunyikan sidebar by default */
+  .sidebar {
+    position: fixed;
+    left: -260px;
+    top: 0;
+    height: 100vh;
+    z-index: 999;
+    transition: left 0.3s ease;
+  }
+
+  /* Tampilkan sidebar saat open */
+  .sidebar.sidebar-open {
+    left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar-open ~ .sidebar-toggle,
+  .sidebar-toggle.hidden {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Cards grid jadi 1 kolom */
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Two col jadi 1 kolom */
+  .two-col {
+    grid-template-columns: 1fr;
+  }
+}
