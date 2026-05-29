@@ -1,6 +1,8 @@
 # FinWise — Finance App (Next.js)
 
-Aplikasi manajemen keuangan pribadi berbasis Next.js 14 dengan fitur Login & Register.
+Aplikasi manajemen keuangan pribadi berbasis Next.js 14 dengan fitur autentikasi, dashboard interaktif, analisis keuangan, budgeting, laporan, dan prediksi AI.
+
+---
 
 ## 🚀 Cara Menjalankan Lokal
 
@@ -15,6 +17,8 @@ npm run dev
 http://localhost:3000
 ```
 
+---
+
 ## 📦 Deploy ke Vercel (Gratis)
 
 ```bash
@@ -28,56 +32,122 @@ vercel login
 vercel --prod
 ```
 
-Atau upload folder ini langsung ke [vercel.com](https://vercel.com) via drag & drop.
+Atau upload project langsung ke [vercel.com](https://vercel.com).
+
+---
 
 ## 🌐 Deploy ke Netlify
 
 ```bash
-# Build dulu
+# Build project
 npm run build
-
-# Upload folder .next ke netlify.com
 ```
 
-## 🔐 Akun Demo
+Lalu upload hasil build ke Netlify.
 
-Klik tombol **"Coba dengan Akun Demo"** di halaman login untuk masuk langsung tanpa daftar.
+---
 
-Atau daftar akun baru lewat halaman Register.
+## 🔐 Fitur Autentikasi
 
-> **Catatan:** Data user disimpan di localStorage browser (client-side). Untuk production dengan database sungguhan, integrasikan dengan NextAuth.js + database pilihan kamu (PostgreSQL, MongoDB, dll).
+- Login & Register user
+- Validasi form
+- Penyimpanan token autentikasi
+- Redirect otomatis setelah login
+
+---
+
+## ✨ Fitur Aplikasi
+
+- 📊 Dashboard ringkasan keuangan
+- 💳 CRUD transaksi
+- 📈 Analisis pemasukan & pengeluaran
+- 🤖 Prediksi AI keuangan
+- 💰 Budget per kategori
+- 📄 Export & laporan keuangan
+- 👤 Profil pengguna
+- 🔔 Sistem notifikasi
+- 🌙 Dark mode UI
+
+---
 
 ## 📁 Struktur Folder
 
-```
-finwise/
+```bash
+frontend/
 ├── app/
-│   ├── globals.css          # Semua styles
-│   ├── layout.tsx           # Root layout
-│   ├── page.tsx             # Redirect ke login/dashboard
-│   ├── login/               # Halaman Login
-│   ├── register/            # Halaman Register
-│   └── dashboard/           # Halaman utama app
+│   ├── dashboard/
+│   │   └── page.tsx
+│   ├── globals.css
+│   ├── icon.svg
+│   ├── layout.tsx
+│   ├── login/
+│   │   ├── page-content.tsx
+│   │   └── page.tsx
+│   ├── page.tsx
+│   ├── register/
+│   │   ├── page-content.tsx
+│   │   └── page.tsx
+│   └── root-redirect.tsx
+│
 ├── components/
-│   ├── pages/               # Semua halaman (Dashboard, Transaksi, dll)
-│   ├── DashboardLayout.tsx  # Layout utama + modal tambah transaksi
-│   ├── Sidebar.tsx          # Navigasi kiri
-│   ├── Topbar.tsx           # Header + notifikasi
-│   ├── Modal.tsx            # Komponen modal reusable
-│   └── Toast.tsx            # Notifikasi toast
-└── lib/
-    └── AuthContext.tsx      # State manajemen autentikasi
+│   ├── DashboardLayout.tsx
+│   ├── Modal.tsx
+│   ├── Sidebar.tsx
+│   ├── Toast.tsx
+│   ├── Topbar.tsx
+│   └── pages/
+│       ├── AnalisisPage.tsx
+│       ├── BudgetPage.tsx
+│       ├── DashboardPage.tsx
+│       ├── LaporanPage.tsx
+│       ├── PrediksiPage.tsx
+│       ├── ProfilPage.tsx
+│       └── TransaksiPage.tsx
+│
+├── lib/
+│   ├── analysis.ts
+│   ├── api.ts
+│   ├── auth.ts
+│   ├── AuthContext.tsx
+│   ├── budgets.ts
+│   ├── category.ts
+│   ├── dashboard.ts
+│   ├── notification.ts
+│   ├── payment-method.ts
+│   ├── predict.ts
+│   ├── profile.ts
+│   ├── report.ts
+│   ├── subcategory.ts
+│   └── transaction.ts
+│
+├── next.config.js
+├── package.json
+├── package-lock.json
+├── README.md
+└── tsconfig.json
 ```
 
-## ✨ Fitur
+---
 
-- 🔐 Login & Register dengan validasi
-- 📊 Dashboard dengan 3 tab (Ringkasan, Bulanan, Tahunan)
-- 💳 Transaksi dengan filter & CRUD
-- 📈 Analisis keuangan dengan chart
-- 🤖 Prediksi AI (simulasi)
-- 💰 Budget per kategori dengan progress bar
-- 📄 Laporan & export (simulasi)
-- 👤 Profil & pengaturan notifikasi
-- 🔔 Panel notifikasi
-- 🌙 Dark mode (default)
+## 🛠️ Teknologi yang Digunakan
+
+- Next.js 14
+- React
+- TypeScript
+- CSS Modules / Global CSS
+- Context API
+- REST API Integration
+
+---
+
+## 🔗 API Integration
+
+Frontend telah terhubung dengan backend API untuk:
+
+- Authentication
+- Dashboard data
+- Transactions
+- Budgets
+- Reports
+- Notifications
+- AI Prediction
