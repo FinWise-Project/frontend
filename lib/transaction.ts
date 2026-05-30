@@ -3,6 +3,8 @@ import { fetchAPI } from './api';
 interface GetTransactionsParams {
   categoryName?: string;
   type?: 'income' | 'expense';
+  page?: number;   // ← tambahan
+  limit?: number;  // ← tambahan
 }
 
 interface TransactionPayload {
@@ -28,11 +30,18 @@ export const getTransactions = async (
     query.append('type', params.type);
   }
 
+  if (params?.page !== undefined) {
+    query.append('page', String(params.page));
+  }
+
+  if (params?.limit !== undefined) {
+    query.append('limit', String(params.limit));
+  }
+
   const queryString = query.toString();
 
   return fetchAPI(`/transactions${queryString ? `?${queryString}` : ''}`, {
     method: 'GET',
-
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
@@ -45,7 +54,6 @@ export const getTransactionById = async (
 ) => {
   return fetchAPI(`/transactions/${transactionId}`, {
     method: 'GET',
-
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
@@ -58,12 +66,10 @@ export const createTransaction = async (
 ) => {
   return fetchAPI('/transactions', {
     method: 'POST',
-
     headers: {
       Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
-
     body: JSON.stringify(payload),
   });
 };
@@ -75,12 +81,10 @@ export const updateTransaction = async (
 ) => {
   return fetchAPI(`/transactions/${transactionId}`, {
     method: 'PUT',
-
     headers: {
       Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
-
     body: JSON.stringify(payload),
   });
 };
@@ -91,7 +95,6 @@ export const deleteTransaction = async (
 ) => {
   return fetchAPI(`/transactions/${transactionId}`, {
     method: 'DELETE',
-
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },

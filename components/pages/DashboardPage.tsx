@@ -74,6 +74,19 @@ const CATEGORY_COLORS = [
   '#34d399',
 ];
 
+// Helper: fallback rangeLabel jika undefined atau mengandung "undefined"
+const getRangeLabel = (
+  label: string | undefined,
+  year: string | number,
+  chart?: { monthLabel: string }[],
+): string => {
+  if (label && !label.toLowerCase().includes('undefined')) return label;
+  if (chart && chart.length > 0) {
+    return `${chart[0].monthLabel} — ${chart[chart.length - 1].monthLabel}`;
+  }
+  return `Tahun ${year}`;
+};
+
 export default function DashboardPage({
   onNavigate,
 }: {
@@ -632,7 +645,11 @@ export default function DashboardPage({
                   onClick={() =>
                     showToast(
                       'Total Pemasukan',
-                      yearly.summary.totalIncome.rangeLabel,
+                      getRangeLabel(
+                        yearly.summary.totalIncome.rangeLabel,
+                        yearly.year,
+                        yearly.chart,
+                      ),
                     )
                   }
                 >
@@ -644,7 +661,11 @@ export default function DashboardPage({
                     {yearly.summary.totalIncome.amount.toLocaleString('id-ID')}
                   </div>
                   <div className="card-sub">
-                    {yearly.summary.totalIncome.rangeLabel}
+                    {getRangeLabel(
+                      yearly.summary.totalIncome.rangeLabel,
+                      yearly.year,
+                      yearly.chart,
+                    )}
                   </div>
                   <div className="tag up">
                     ↑ {yearly.summary.totalIncome.status}
@@ -655,7 +676,11 @@ export default function DashboardPage({
                   onClick={() =>
                     showToast(
                       'Total Pengeluaran',
-                      yearly.summary.totalExpense.rangeLabel,
+                      getRangeLabel(
+                        yearly.summary.totalExpense.rangeLabel,
+                        yearly.year,
+                        yearly.chart,
+                      ),
                     )
                   }
                 >
@@ -667,7 +692,11 @@ export default function DashboardPage({
                     {yearly.summary.totalExpense.amount.toLocaleString('id-ID')}
                   </div>
                   <div className="card-sub">
-                    {yearly.summary.totalExpense.rangeLabel}
+                    {getRangeLabel(
+                      yearly.summary.totalExpense.rangeLabel,
+                      yearly.year,
+                      yearly.chart,
+                    )}
                   </div>
                   <div className="tag up">
                     ↑ {yearly.summary.totalExpense.status}

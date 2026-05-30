@@ -20,16 +20,13 @@ const filters = [
   { id: 'all', label: 'Semua' },
   { id: 'income', label: 'Pemasukan' },
   { id: 'expense', label: 'Pengeluaran' },
-  { id: 'Makanan', label: 'Makanan' },
-  { id: 'Pendidikan', label: 'Pendidikan' },
-  { id: 'Perjalanan', label: 'Perjalanan' },
-  { id: 'Transportasi', label: 'Transportasi' },
-  { id: 'Gaji & Pendapatan', label: 'Gaji & Pendapatan' },
-  { id: 'Kesehatan', label: 'Kesehatan' },
-  { id: 'Tagihan', label: 'Tagihan' },
-  { id: 'Hiburan', label: 'Hiburan' },
-  { id: 'Lainnya', label: 'Lainnya' },
-  { id: 'Belanja', label: 'Belanja' },
+  { id: 'Bills', label: 'Tagihan' },
+  { id: 'Entertainment', label: 'Hiburan' },
+  { id: 'Food', label: 'Makanan' },
+  { id: 'Salary', label: 'Gaji & Pendapatan' },
+  { id: 'Shopping', label: 'Belanja' },
+  { id: 'Transport', label: 'Transportasi' },
+  { id: 'Others', label: 'Lainnya' },
 ];
 
 const initialForm = {
@@ -41,6 +38,8 @@ const initialForm = {
   subCategoryId: '',
   paymentMethodId: '',
 };
+
+const ITEMS_PER_PAGE = 50;
 
 export default function TransaksiPage({ onAddTx }: { onAddTx: () => void }) {
   const { showToast } = useToast();
@@ -56,6 +55,11 @@ export default function TransaksiPage({ onAddTx }: { onAddTx: () => void }) {
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [form, setForm] = useState(initialForm);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalData, setTotalData] = useState(0);
+
   const isFormValid = Boolean(
     form.description &&
     form.amount &&
@@ -66,18 +70,47 @@ export default function TransaksiPage({ onAddTx }: { onAddTx: () => void }) {
   );
 
   useEffect(() => {
-    fetchTransactions();
+    fetchTransactions(undefined, undefined, 1);
     fetchCategories();
     fetchPaymentMethods();
   }, []);
 
-  async function fetchTransactions(categoryName?: string) {
+  /**
+   * Fetch transactions with optional filter + pagination.
+   * @param categoryName  - filter by category name
+   * @param type          - filter by 'income' | 'expense'
+   * @param page          - page number (1-based), defaults to currentPage
+   */
+  async function fetchTransactions(
+    categoryName?: string,
+    type?: 'income' | 'expense',
+    page: number = currentPage,
+  ) {
     try {
       setLoading(true);
       const token = localStorage.getItem('accessToken');
       if (!token) return;
-      const response = await getTransactions(token, { categoryName });
+
+      const response = await getTransactions(token, {
+        categoryName,
+        type,
+        page,
+        limit: ITEMS_PER_PAGE,
+      });
+
       setTxList(response.data.transactions);
+
+      // Sesuaikan key berikut dengan respons API Anda.
+      // Contoh umum: response.data.totalPages & response.data.total
+      const total: number = response.data.total ?? response.data.totalData ?? 0;
+      const pages: number =
+        response.data.totalPages ??
+        Math.ceil(total / ITEMS_PER_PAGE) ??
+        1;
+
+      setTotalData(total);
+      setTotalPages(pages);
+      setCurrentPage(page);
     } catch (error) {
       console.error(error);
       showToast('Error', 'Gagal mengambil transaksi');
@@ -124,7 +157,10 @@ export default function TransaksiPage({ onAddTx }: { onAddTx: () => void }) {
       const token = localStorage.getItem('accessToken');
       if (!token) return;
       await deleteTransaction(token, id);
-      setTxList((prev) => prev.filter((t) => t.id !== id));
+      // Refresh halaman yang sama; jika page jadi kosong setelah delete, kembali ke page sebelumnya
+      const targetPage =
+        txList.length === 1 && currentPage > 1 ? currentPage - 1 : currentPage;
+      await handleFilterChange(activeFilter, targetPage);
       showToast('Berhasil', 'Transaksi berhasil dihapus');
     } catch (error) {
       console.error(error);
@@ -132,7 +168,7 @@ export default function TransaksiPage({ onAddTx }: { onAddTx: () => void }) {
     }
   }
 
-  async function handleFilterChange(filterId: string) {
+  async function handleFilterChange(filterId: string, page = 1) {
     setActiveFilter(filterId);
     const token = localStorage.getItem('accessToken');
     if (!token) return;
@@ -140,17 +176,30 @@ export default function TransaksiPage({ onAddTx }: { onAddTx: () => void }) {
       setLoading(true);
       let response;
       if (filterId === 'all') {
-        response = await getTransactions(token);
+        response = await getTransactions(token, { page, limit: ITEMS_PER_PAGE });
       } else if (filterId === 'income' || filterId === 'expense') {
         response = await getTransactions(token, {
           type: filterId as 'income' | 'expense',
+          page,
+          limit: ITEMS_PER_PAGE,
         });
       } else {
         response = await getTransactions(token, {
           categoryName: filterId,
+          page,
+          limit: ITEMS_PER_PAGE,
         });
       }
+
       setTxList(response.data.transactions);
+
+      const total: number = response.data.total ?? response.data.totalData ?? 0;
+      const pages: number =
+        response.data.totalPages ?? Math.ceil(total / ITEMS_PER_PAGE) ?? 1;
+
+      setTotalData(total);
+      setTotalPages(pages);
+      setCurrentPage(page);
     } catch (error) {
       console.error(error);
       showToast('Error', 'Gagal filter transaksi');
@@ -179,7 +228,8 @@ export default function TransaksiPage({ onAddTx }: { onAddTx: () => void }) {
       setAddOpen(false);
       setForm(initialForm);
       setSubcategories([]);
-      fetchTransactions();
+      // Kembali ke page 1 agar data baru terlihat
+      handleFilterChange(activeFilter, 1);
     } catch (error) {
       console.error(error);
       showToast('Error', 'Gagal menambah transaksi');
@@ -236,11 +286,33 @@ export default function TransaksiPage({ onAddTx }: { onAddTx: () => void }) {
       setEditOpen(false);
       setForm(initialForm);
       setSubcategories([]);
-      fetchTransactions();
+      // Tetap di halaman yang sama setelah update
+      handleFilterChange(activeFilter, currentPage);
     } catch (error) {
       console.error(error);
       showToast('Error', 'Gagal update transaksi');
     }
+  }
+
+  /** Membuat array nomor halaman dengan elipsis. Contoh: [1, '...', 4, 5, 6, '...', 10] */
+  function buildPageNumbers(): (number | '...')[] {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    const pages: (number | '...')[] = [];
+    const delta = 2; // jumlah halaman di kiri/kanan currentPage
+
+    const left = Math.max(2, currentPage - delta);
+    const right = Math.min(totalPages - 1, currentPage + delta);
+
+    pages.push(1);
+    if (left > 2) pages.push('...');
+    for (let p = left; p <= right; p++) pages.push(p);
+    if (right < totalPages - 1) pages.push('...');
+    pages.push(totalPages);
+
+    return pages;
   }
 
   function renderForm(onSubmit: () => void, submitText: string) {
@@ -389,8 +461,11 @@ export default function TransaksiPage({ onAddTx }: { onAddTx: () => void }) {
     );
   }
 
+  const pageNumbers = buildPageNumbers();
+
   return (
     <div>
+      {/* ── Header: filter bar + tombol tambah ── */}
       <div
         style={{
           display: 'flex',
@@ -406,7 +481,7 @@ export default function TransaksiPage({ onAddTx }: { onAddTx: () => void }) {
             <div
               key={f.id}
               className={`filter-chip${activeFilter === f.id ? ' active' : ''}`}
-              onClick={() => handleFilterChange(f.id)}
+              onClick={() => handleFilterChange(f.id, 1)}
             >
               {f.label}
             </div>
@@ -422,6 +497,7 @@ export default function TransaksiPage({ onAddTx }: { onAddTx: () => void }) {
         </button>
       </div>
 
+      {/* ── List transaksi ── */}
       <div>
         {loading && (
           <div
@@ -507,6 +583,81 @@ export default function TransaksiPage({ onAddTx }: { onAddTx: () => void }) {
         )}
       </div>
 
+      {/* ── Pagination ── */}
+      {!loading && totalPages > 1 && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginTop: '16px',
+            paddingTop: '14px',
+            borderTop: '0.5px solid var(--border)',  /* garis pemisah dari list */
+            flexWrap: 'wrap',
+            gap: '8px',
+          }}
+        >
+          {/* Info total data */}
+          <span style={{ fontSize: '12px', color: 'var(--text3)' }}>
+            {totalData > 0
+              ? `Menampilkan ${(currentPage - 1) * ITEMS_PER_PAGE + 1}–${Math.min(
+                  currentPage * ITEMS_PER_PAGE,
+                  totalData,
+                )} dari ${totalData} transaksi`
+              : `Halaman ${currentPage} dari ${totalPages}`}
+          </span>
+
+          {/* Tombol halaman */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            {/* Prev */}
+            <button
+              className="page-btn"
+              disabled={currentPage === 1}
+              onClick={() => handleFilterChange(activeFilter, currentPage - 1)}
+              aria-label="Halaman sebelumnya"
+            >
+              ‹
+            </button>
+
+            {pageNumbers.map((p, i) =>
+              p === '...' ? (
+                <span
+                  key={`ellipsis-${i}`}
+                  style={{
+                    padding: '0 4px',
+                    fontSize: '13px',
+                    color: 'var(--text3)',
+                  }}
+                >
+                  …
+                </span>
+              ) : (
+                <button
+                  key={p}
+                  className={`page-btn${currentPage === p ? ' active' : ''}`}
+                  onClick={() => handleFilterChange(activeFilter, p as number)}
+                  aria-label={`Halaman ${p}`}
+                  aria-current={currentPage === p ? 'page' : undefined}
+                >
+                  {p}
+                </button>
+              ),
+            )}
+
+            {/* Next */}
+            <button
+              className="page-btn"
+              disabled={currentPage === totalPages}
+              onClick={() => handleFilterChange(activeFilter, currentPage + 1)}
+              aria-label="Halaman berikutnya"
+            >
+              ›
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal Tambah ── */}
       <Modal
         id="addTx"
         open={addOpen}
@@ -517,6 +668,7 @@ export default function TransaksiPage({ onAddTx }: { onAddTx: () => void }) {
         {renderForm(handleCreateTransaction, 'Simpan')}
       </Modal>
 
+      {/* ── Modal Edit ── */}
       <Modal
         id="editTx"
         open={editOpen}

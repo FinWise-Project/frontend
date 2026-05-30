@@ -457,3 +457,36 @@ body{
     grid-template-columns: 1fr;
   }
 }
+
+/* Pagination */
+.page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 6px;
+  border-radius: 8px;
+  border: 0.5px solid var(--border);       /* sesuaikan var border Anda */
+  background: var(--card);
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  font-family: inherit;
+  user-select: none;
+}
+.page-btn:hover:not(:disabled):not(.active) {
+  background: var(--hover);
+  border-color: var(--border-strong);
+}
+.page-btn.active {
+  background: var(--text);
+  color: var(--card);
+  border-color: var(--text);
+  font-weight: 500;
+}
+.page-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
